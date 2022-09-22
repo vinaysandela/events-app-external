@@ -10,8 +10,8 @@ env:
   RUN_NUMBER: ${{ github.run_number }}
 
 jobs:
-  setup-build-publish-deploy:
-    name: Setup, Build, Publish, and Deploy
+  setup-build-publish:
+    name: Setup, Build, Publish
     runs-on: ubuntu-latest
     environment: production
 
@@ -44,6 +44,6 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE }}:v2.${{ github.run_number }}
+        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE }}:v3.${{ github.run_number }}
 
 
