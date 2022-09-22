@@ -8,10 +8,11 @@ on:
 env:
   DOCKER_ID:  ${{ secrets.DOCKER_HUB_USERNAME }}
   RUN_NUMBER: ${{ github.run_number }}
+  IMAGE: external-w
 
 jobs:
-  setup-build-publish:
-    name: Setup, Build, Publish
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
     environment: production
 
@@ -44,6 +45,6 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE }}:v3.${{ github.run_number }}
+        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE }}:v2.1.${{ github.run_number }}
 
 
