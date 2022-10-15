@@ -6,55 +6,57 @@ on:
       - main
 
 env:
-  DOCKER_ID:  ${{ secrets.DOCKER_HUB_USERNAME }}
   RUN_NUMBER: ${{ github.run_number }}
-  IMAGE: external-w
+  IMAGE: external
 
 jobs:
   build-test_node_project:
-    name: setup, test
+    name: build and test node project
     runs-on: ubuntu-latest
     environment: production
-    
-    # Get the code
+
     steps:
     - name: Checkout
       uses: actions/checkout@v3
 
-   # Test
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '12.x'
+        node-version: '18.x'
+        check-latest: true
+
     - name: Install dependencies
-      run: npm install  
+      run: npm ci
+
     - name: Run tests
       run: npm test
-    
+   
   login_then_push_dockerhub:
     name: docker image build and push
+    needs: build-test_node_project
     runs-on: ubuntu-latest
     environment: production
-    needs: build-test_node_project
-    
-    # login to docker
     steps:
-    - name: Login to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-  
-    # build and publish
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-    - name: Build and push
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE }}:v2.1.${{ github.run_number }}
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+         node-version: '18.x'
+         check-latest: true
+      - run: npm install
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
    
-   
-  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Docker build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE }}:v2.1.${{ github.run_number }}
